@@ -9,18 +9,20 @@ authors = [
 requires-python = ">=3.10"
 dependencies = [
     "pin>=4.1.0",
-    "sapien>=3.0.3",
     "transforms3d>=0.4.2",
     "tyro>=1.0.15",
 ]
 
-[[tool.uv.index]]
-name = "pytorch"
-url = "https://mirror.sjtu.edu.cn/pytorch-wheels/cu126"
-explicit = true
-
 [project.scripts]
 robot-test = "robot_refactor:main"
+
+[project.optional-dependencies]
+meshcat = [
+    "meshcat>=0.3.2",
+]
+sapien = [
+    "sapien>=3.0.3",
+]
 
 [build-system]
 requires = ["uv_build>=0.10.11,<0.11.0"]

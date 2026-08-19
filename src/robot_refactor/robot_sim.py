@@ -1,8 +1,12 @@
 from typing import Literal, Optional
 from warnings import warn
 
-import sapien
-from sapien.wrapper.urdf_loader import URDFLoader
+try:
+    import sapien
+    from sapien.wrapper.urdf_loader import URDFLoader
+except ImportError as err:
+    raise ImportError("sapien is not install, please install by pip robot_refactor[sapien]")
+
 import numpy as np
 from pathlib import Path
 from transforms3d.quaternions import mat2quat
