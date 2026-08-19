@@ -15,13 +15,12 @@ class JointAdapter:
         model: Any,
         # 输入 q pos 各个索引对应的 URDF 关节名称
         source_idx: Optional[JointNameIdx] = None,
-        # 基于 Pinocchio 规则排列的默认关节角度, 未提供时使用 URDF 定义的自然关节位置
+        # 基于 Pinocchio 规则排列的默认关节角度, 未提供时使用 Pinocchio 配置空间的 neutral element
         q_pin_default: Optional[ArrayLikeType] = None
     ) -> None:
 
         self.n_q_pin = int(model.nq)
         
-
         if source_idx is not None:
             self.n_q_raw = len(source_idx)
             self.raw_in_pin_idx = np.zeros(self.n_q_raw, dtype = np.int32)
@@ -36,6 +35,7 @@ class JointAdapter:
                 if model.nqs[joint_id] != 1:
                     raise RuntimeError(
                         f"Joint {joint_name!r} has nq= {model.nqs[joint_id]}, expected 1"
+                        "JointAdapter currently supports scalar Pinocchio configurations only."
                     )
 
                 self.raw_in_pin_idx[raw_idx] = model.idx_qs[joint_id]
@@ -47,14 +47,20 @@ class JointAdapter:
         if q_pin_default is None:
             # 获取 URDF 的自然关节角
             q_pin_default = pin.neutral(model) # type: ignore
-        self.q_pin_default = np.asarray(q_pin_default)
+        q_pin_default = np.asarray(q_pin_default, dtype = float)
 
+        if q_pin_default.shape != (self.n_q_pin,):
+            raise ValueError(
+                f"Expected q_raw shape ({self.n_q_pin},), "
+                f"got {q_pin_default.shape}"
+            )
+        self.q_pin_default = np.copy(q_pin_default)
+                                      
     def to_q_pin(self, q_raw: ArrayLikeType):
-        q_raw = np.asarray(q_raw, dtype=float)
+        q_raw = np.asarray(q_raw, dtype = float)
         if q_raw.shape != (self.n_q_raw,):
             raise ValueError(
-                f"Expected q_raw shape "
-                f"({self.raw_in_pin_idx},), "
+                f"Expected q_raw shape ({self.n_q_raw},), "
                 f"got {q_raw.shape}"
             )
 
@@ -89,16 +95,13 @@ class RobotModel:
         # 输入 q pos 各个索引对应的 URDF 关节名称
         source_idx: Optional[JointNameIdx] = None,
         # 基于 Pinocchio 规则排列的默认关节角度, 未提供时使用 URDF 定义的自然关节位置
-        q_pin_default: Optional[ArrayLikeType] = None
+        q_pin_default: Optional[ArrayLikeType] = None,
     ):
         # =========================
         # Load model
         # =========================
 
-        (
-            self.model,
-            self.collision_model,
-        ) = pin.buildModelsFromUrdf( # type: ignore
+        (self.model, self.collision_model) = pin.buildModelsFromUrdf( # type: ignore
             urdf_path,
             package_dirs = package_dir if package_dir is not None else [],
             geometry_types = pin.GeometryType.COLLISION, # type: ignore
@@ -311,7 +314,7 @@ def main(
 
     load_timer = time.perf_counter()
     rm = RobotModel(
-        urdf_path, resource_dir, srdf_path
+        urdf_path, resource_dir, srdf_path, 
     )
     load_timer = time.perf_counter() - load_timer
     print(f"load urdf in {load_timer:.3f}s")
