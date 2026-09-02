@@ -155,6 +155,15 @@ class RobotModel:
         '''
         return self.joint_adapter.to_q_raw(self.joint_adapter.q_pin_default)
 
+    def get_generalized_gravity(self, q: ArrayLikeType):
+        q = self.joint_adapter.to_q_pin(q)
+        tau_g = pin.computeGeneralizedGravity( # type: ignore
+            self.model,
+            self.data,
+            q
+        )
+        return self.joint_adapter.to_q_raw(np.asarray(tau_g))
+
     # --------------------------------
     # FK
     # --------------------------------
