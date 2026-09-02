@@ -44,7 +44,7 @@ class RobotMeshcatViz:
         q: Optional[ArrayLikeType] = None,
     ):
         if q is None:
-            q = self.robot_model.get_q_neutral()
+            q = self.robot_model.get_q_default()
 
         q_pin = self.robot_model.joint_adapter.to_q_pin(q)
         self.viz.display(q_pin)

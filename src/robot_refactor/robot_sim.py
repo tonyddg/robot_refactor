@@ -55,12 +55,13 @@ class RobotSim:
         self.robot_model = RobotModel(
             urdf_path, package_dir, srdf_path, source_idx = source_idx, q_pin_default = q_pin_default
         )
+        self.robot_context = self.robot_model.create_context()
         self.input_joint_adapter = JointAdapter(
             self.robot_model.model, input_source_idx, q_pin_default
         )
 
         # 设置机器人控制器
-        arm_zero_qpos = self.robot_model.get_q_neutral()
+        arm_zero_qpos = self.robot_model.get_q_default()
         active_joints = self.robot_object.get_active_joints()
         for joint_idx, joint in enumerate(active_joints):
             joint.set_drive_property(stiffness = 200, damping = 50, force_limit = 1000, mode="force")
@@ -175,7 +176,7 @@ class RobotSim:
         # 正运动学
         elif self.viewer.window.key_press("c"):
             q_sapien = self.robot_object.get_qpos()
-            tcp_loc, tcp_rot = self.robot_model.forward_kinematics(q_sapien, self.tcp_link_name)
+            tcp_loc, tcp_rot = self.robot_context.forward_kinematics(q_sapien, self.tcp_link_name)
             tcp_rot = mat2quat(tcp_rot)
 
             print(f"Pinocchio TCP FK result:\nloc: {tcp_loc}, rot: {tcp_rot}")
@@ -184,11 +185,11 @@ class RobotSim:
             q_sapien = self.robot_object.get_qpos()
 
             collision_use_time = time.perf_counter()
-            collision_info = self.robot_model.self_collision_pairs(q_sapien)
+            collision_info = self.robot_context.self_collision_pairs(q_sapien)
             collision_use_time = time.perf_counter() - collision_use_time
 
             distance_use_time = time.perf_counter()
-            min_distance, min_pair, outer_pairs = self.robot_model.min_self_distance(q_sapien, 0.01)
+            min_distance, min_pair, outer_pairs = self.robot_context.min_self_distance(q_sapien, 0.01)
             distance_use_time = time.perf_counter() - distance_use_time
 
             print(f"use time: {collision_use_time:.3f}, Pinnochio collision info: {collision_info}")
