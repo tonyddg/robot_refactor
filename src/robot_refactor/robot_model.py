@@ -156,6 +156,9 @@ class RobotModel:
         return self.joint_adapter.to_q_raw(self.joint_adapter.q_pin_default)
 
     def get_generalized_gravity(self, q: ArrayLikeType):
+        '''
+        计算机器人各个关节平衡重力所需的平衡力矩
+        '''
         q = self.joint_adapter.to_q_pin(q)
         tau_g = pin.computeGeneralizedGravity( # type: ignore
             self.model,
