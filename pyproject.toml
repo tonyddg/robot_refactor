@@ -21,7 +21,7 @@ meshcat = [
     "meshcat>=0.3.2",
 ]
 sapien = [
-    "sapien>=3.0.3",
+    "sapien>=3.0.3; platform_machine == 'x86_64'",
 ]
 
 [build-system]
