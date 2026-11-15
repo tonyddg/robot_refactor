@@ -409,7 +409,7 @@ class RobotContext:
 
         return min_distance, min_pair, outer_pairs
 
-def main(
+def create_robot_model(
     urdf_path: FilePathType = "./resources/robot.urdf",
     resource_dir: Optional[FilePathType] = "./resources",
     srdf_path: Optional[FilePathType] = None,
@@ -430,6 +430,28 @@ def main(
     print(f"robot joint idx: {joint_idx}") 
 
     return rm
+
+def main(
+    urdf_path: FilePathType = "./resources/robot.urdf",
+    resource_dir: Optional[FilePathType] = "./resources",
+    srdf_path: Optional[FilePathType] = None,
+    frame: str = "base",
+):
+
+    import time
+    
+    rm = create_robot_model(urdf_path, resource_dir, srdf_path)
+    rc = rm.create_context()
+
+    _start_time = time.perf_counter()
+    res = rc.forward_kinematics(rm.get_q_default(), frame)
+    _use_time = time.perf_counter() - _start_time
+    print(f"FK in {_use_time * 1000:.3f} ms get {res}")
+
+    _start_time = time.perf_counter()
+    res = rc.get_generalized_gravity(rm.get_q_default())
+    _use_time = time.perf_counter() - _start_time
+    print(f"get generalized gravity in {_use_time * 1000:.3f} ms get {res}")
 
 if __name__ == "__main__":
     import tyro

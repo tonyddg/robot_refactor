@@ -8,7 +8,7 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "pin>=4.1.0",
+    "pin>=2.7.0",
     "transforms3d>=0.4.2",
     "tyro>=1.0.15",
 ]

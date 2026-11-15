@@ -86,9 +86,9 @@ def main(
     测试将 URDF 加载为 Pinocchio 模型并输出机器人信息
     '''
 
-    from robot_refactor.robot_model import main
+    from robot_refactor.robot_model import create_robot_model
 
-    rm = main(
+    rm = create_robot_model(
         urdf_path, resource_dir, srdf_path
     )
     rv = RobotMeshcatViz(
