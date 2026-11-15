@@ -159,7 +159,7 @@ class RobotModel:
             package_dirs = [str(package_dir)]
 
         (self.model, self.collision_model) = pin.buildModelsFromUrdf( # type: ignore
-            urdf_path,
+            str(urdf_path),
             package_dirs = package_dirs,
             geometry_types = pin.GeometryType.COLLISION, # type: ignore
         )
@@ -180,7 +180,7 @@ class RobotModel:
             pin.removeCollisionPairs( # type: ignore
                 self.model,
                 self.collision_model,
-                srdf_path,
+                str(srdf_path),
             )
 
         # =========================
